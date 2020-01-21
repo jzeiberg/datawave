@@ -78,6 +78,8 @@ import datawave.webservice.result.BaseResponse;
 import datawave.webservice.result.GenericResponse;
 import datawave.webservice.result.QueryImplListResponse;
 import datawave.webservice.result.QueryLogicResponse;
+import datawave.webservice.result.QueryWizardStep1Response;
+import datawave.webservice.result.QueryWizardStep2Response;
 import datawave.webservice.result.VoidResponse;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Message;
@@ -374,6 +376,185 @@ public class QueryExecutorBean implements QueryExecutor {
         }
         Collections.sort(logicConfigurationList, Comparator.comparing(QueryLogicDescription::getName));
         response.setQueryLogicList(logicConfigurationList);
+        
+        return response;
+    }
+    
+    /**
+     * Display a simple query web UI for the quickstart
+     *
+     * @HTTP 200 Success
+     * @return datawave.webservice.result.QueryLogicResponse
+     * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
+     * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
+     * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
+     */
+    @Path("/showQueryWizard")
+    @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
+    @GET
+    @Interceptors({ResponseInterceptor.class})
+    @Timed(name = "dw.query.showQueryWizard", absolute = true)
+    public QueryWizardStep1Response showQueryWizardStep1() {
+        QueryWizardStep1Response response = new QueryWizardStep1Response();
+        List<QueryLogic<?>> logicList = queryLogicFactory.getQueryLogicList();
+        List<QueryLogicDescription> logicConfigurationList = new ArrayList<>();
+        
+        // reference query necessary to avoid NPEs in getting the Transformer and BaseResponse
+        Query q = new QueryImpl();
+        Date now = new Date();
+        q.setExpirationDate(now);
+        q.setQuery("test");
+        q.setQueryAuthorizations("ALL");
+        
+        for (QueryLogic<?> l : logicList) {
+            try {
+                QueryLogicDescription d = new QueryLogicDescription(l.getLogicName());
+                d.setAuditType(l.getAuditType(null).toString());
+                d.setLogicDescription(l.getLogicDescription());
+                
+                Set<String> optionalQueryParameters = l.getOptionalQueryParameters();
+                if (optionalQueryParameters != null) {
+                    d.setSupportedParams(new ArrayList<>(optionalQueryParameters));
+                }
+                Set<String> requiredQueryParameters = l.getRequiredQueryParameters();
+                if (requiredQueryParameters != null) {
+                    d.setRequiredParams(new ArrayList<>(requiredQueryParameters));
+                }
+                Set<String> exampleQueries = l.getExampleQueries();
+                if (exampleQueries != null) {
+                    d.setExampleQueries(new ArrayList<>(exampleQueries));
+                }
+                Set<String> requiredRoles = l.getRoleManager().getRequiredRoles();
+                if (requiredRoles != null) {
+                    List<String> requiredRolesList = new ArrayList<>();
+                    requiredRolesList.addAll(l.getRoleManager().getRequiredRoles());
+                    d.setRequiredRoles(requiredRolesList);
+                }
+                
+                try {
+                    d.setResponseClass(l.getResponseClass(q));
+                } catch (QueryException e) {
+                    log.error(e, e);
+                    response.addException(e);
+                    d.setResponseClass("unknown");
+                }
+                
+                List<String> querySyntax = new ArrayList<>();
+                try {
+                    Method m = l.getClass().getMethod("getQuerySyntaxParsers");
+                    Object result = m.invoke(l);
+                    if (result instanceof Map<?,?>) {
+                        Map<?,?> map = (Map<?,?>) result;
+                        for (Object o : map.keySet())
+                            querySyntax.add(o.toString());
+                    }
+                } catch (Exception e) {
+                    log.warn("Unable to get query syntax for query logic: " + l.getClass().getCanonicalName());
+                }
+                if (querySyntax.isEmpty()) {
+                    querySyntax.add("CUSTOM");
+                }
+                d.setQuerySyntax(querySyntax);
+                
+                logicConfigurationList.add(d);
+            } catch (Exception e) {
+                log.error("Error setting query logic description", e);
+            }
+        }
+        Collections.sort(logicConfigurationList, Comparator.comparing(QueryLogicDescription::getName));
+        response.setQueryLogicList(logicConfigurationList);
+        
+        return response;
+    }
+    
+    /**
+     * Display a simple query web UI for the quickstart
+     *
+     * @HTTP 200 Success
+     * @return datawave.webservice.result.QueryLogicResponse
+     * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
+     * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
+     * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
+     */
+    @Path("/showQueryWizardStep2")
+    @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
+    @POST
+    @Interceptors({ResponseInterceptor.class})
+    @Timed(name = "dw.query.showQueryWizardStep2", absolute = true)
+    public QueryWizardStep2Response showQueryWizardStep2(MultivaluedMap<String,String> queryParameters, @Context HttpHeaders httpHeaders) {
+        QueryWizardStep2Response response = new QueryWizardStep2Response();
+        String queryType = queryParameters.getFirst("queryType");
+        QueryLogicDescription theQld = null;
+        List<QueryLogic<?>> logicList = queryLogicFactory.getQueryLogicList();
+        
+        // reference query necessary to avoid NPEs in getting the Transformer and BaseResponse
+        Query q = new QueryImpl();
+        Date now = new Date();
+        q.setExpirationDate(now);
+        q.setQuery("test");
+        q.setQueryAuthorizations("ALL");
+        
+        for (QueryLogic<?> l : logicList) {
+            try {
+                
+                if (l.getLogicName().equals(queryType)) {
+                    
+                    QueryLogicDescription d = new QueryLogicDescription(l.getLogicName());
+                    d.setAuditType(l.getAuditType(null).toString());
+                    d.setLogicDescription(l.getLogicDescription());
+                    theQld = d;
+                    
+                    Set<String> optionalQueryParameters = l.getOptionalQueryParameters();
+                    if (optionalQueryParameters != null) {
+                        d.setSupportedParams(new ArrayList<>(optionalQueryParameters));
+                    }
+                    Set<String> requiredQueryParameters = l.getRequiredQueryParameters();
+                    if (requiredQueryParameters != null) {
+                        d.setRequiredParams(new ArrayList<>(requiredQueryParameters));
+                    }
+                    Set<String> exampleQueries = l.getExampleQueries();
+                    if (exampleQueries != null) {
+                        d.setExampleQueries(new ArrayList<>(exampleQueries));
+                    }
+                    Set<String> requiredRoles = l.getRoleManager().getRequiredRoles();
+                    if (requiredRoles != null) {
+                        List<String> requiredRolesList = new ArrayList<>();
+                        requiredRolesList.addAll(l.getRoleManager().getRequiredRoles());
+                        d.setRequiredRoles(requiredRolesList);
+                    }
+                    
+                    try {
+                        d.setResponseClass(l.getResponseClass(q));
+                    } catch (QueryException e) {
+                        log.error(e, e);
+                        response.addException(e);
+                        d.setResponseClass("unknown");
+                    }
+                    
+                    List<String> querySyntax = new ArrayList<>();
+                    try {
+                        Method m = l.getClass().getMethod("getQuerySyntaxParsers");
+                        Object result = m.invoke(l);
+                        if (result instanceof Map<?,?>) {
+                            Map<?,?> map = (Map<?,?>) result;
+                            for (Object o : map.keySet())
+                                querySyntax.add(o.toString());
+                        }
+                    } catch (Exception e) {
+                        log.warn("Unable to get query syntax for query logic: " + l.getClass().getCanonicalName());
+                    }
+                    if (querySyntax.isEmpty()) {
+                        querySyntax.add("CUSTOM");
+                    }
+                    d.setQuerySyntax(querySyntax);
+                    
+                }
+            } catch (Exception e) {
+                log.error("Error setting query logic description", e);
+            }
+        }
+        
+        response.setTheQueryLogicDescription(theQld);
         
         return response;
     }
