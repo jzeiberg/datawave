@@ -60,7 +60,7 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
         StringBuilder builder = new StringBuilder();
         builder.append("<H1>DataWave Query Form</H1>");
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + theQLD.getName()
-                        + "/createAndNext\"  method=\"post\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
+                        + "/showQueryWizardStep3\"  method=\"post\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<br/>");
         builder.append("<br/>");
         builder.append("<H2>" + theQLD.getName() + " (" + theQLD.getLogicDescription() + ")</H2>");

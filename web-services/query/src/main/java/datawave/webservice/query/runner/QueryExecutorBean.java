@@ -80,6 +80,7 @@ import datawave.webservice.result.QueryImplListResponse;
 import datawave.webservice.result.QueryLogicResponse;
 import datawave.webservice.result.QueryWizardStep1Response;
 import datawave.webservice.result.QueryWizardStep2Response;
+import datawave.webservice.result.QueryWizardStep3Response;
 import datawave.webservice.result.VoidResponse;
 import io.protostuff.LinkedBuffer;
 import io.protostuff.Message;
@@ -548,6 +549,8 @@ public class QueryExecutorBean implements QueryExecutor {
                     }
                     d.setQuerySyntax(querySyntax);
                     
+                    break;
+                    
                 }
             } catch (Exception e) {
                 log.error("Error setting query logic description", e);
@@ -557,6 +560,32 @@ public class QueryExecutorBean implements QueryExecutor {
         response.setTheQueryLogicDescription(theQld);
         
         return response;
+    }
+    
+    /**
+     * @param logicName
+     * @param queryParameters
+     * @return
+     */
+    @POST
+    @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
+    @Path("/{logicName}/showQueryWizardStep3")
+    @GenerateQuerySessionId(cookieBasePath = "/DataWave/Query/")
+    @Interceptors({ResponseInterceptor.class})
+    @Timed(name = "dw.query.showQueryWizardStep3", absolute = true)
+    public QueryWizardStep3Response showQueryWizardStep3(@Required("logicName") @PathParam("logicName") String logicName,
+                    MultivaluedMap<String,String> queryParameters, @Context HttpHeaders httpHeaders) {
+        CreateQuerySessionIDFilter.QUERY_ID.set(null);
+        QueryWizardStep3Response queryWizardStep3Response = new QueryWizardStep3Response();
+        
+        GenericResponse<String> createResponse = createQuery(logicName, queryParameters, httpHeaders);
+        String queryId = createResponse.getResult();
+        CreateQuerySessionIDFilter.QUERY_ID.set(queryId);
+        GenericResponse<String> planResponse = plan(queryId);
+        queryWizardStep3Response.setQueryId(queryId);
+        queryWizardStep3Response.setQueryPlan(planResponse.getResult());
+        
+        return queryWizardStep3Response;
     }
     
     @Override
