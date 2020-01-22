@@ -10,28 +10,30 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import datawave.webservice.HtmlProvider;
+import datawave.webservice.query.result.event.DefaultEvent;
+import datawave.webservice.query.result.event.EventBase;
 import datawave.webservice.query.result.logic.QueryLogicDescription;
 
 import org.apache.commons.lang.StringUtils;
 
-@XmlRootElement(name = "QueryWizardStep3")
+@XmlRootElement(name = "QueryWizardNextResult")
 @XmlAccessorType(XmlAccessType.NONE)
 @XmlAccessorOrder(XmlAccessOrder.ALPHABETICAL)
-public class QueryWizardStep3Response extends BaseResponse implements HtmlProvider {
+public class QueryWizardResultResponse extends BaseResponse implements HtmlProvider {
     
     private static final long serialVersionUID = 1L;
-    private static final String TITLE = "Query Plan", EMPTY = "";
-    @XmlElement(name = "plan")
-    private String plan = "";
+    private static final String TITLE = "Query Result", EMPTY = "";
     @XmlElement(name = "queryId")
     private String queryId = "";
+    @XmlElement
+    private BaseQueryResponse response = null;
+    
+    public void setResponse(BaseQueryResponse response) {
+        this.response = response;
+    }
     
     public void setQueryId(String queryId) {
         this.queryId = queryId;
-    }
-    
-    public void setQueryPlan(String theplan) {
-        this.plan = theplan;
     }
     
     @Override
@@ -65,10 +67,19 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
         builder.append("<H1>DataWave Query Plan</H1>");
         builder.append("<br/>");
         builder.append("<br/>");
-        builder.append("<H2>The query plan: " + plan + "</H2>");
         builder.append("<br/>");
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
+        if (response instanceof DefaultEventQueryResponse) {
+            DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
+            for (EventBase event : tempResponse.getEvents()) {
+                for (Object field : event.getFields()) {
+                    builder.append(field.toString());
+                    builder.append("<br/>");
+                }
+                
+            }
+        }
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<center><input type=\"submit\" value=\"Next\" align=\"left\" width=\"50\" /></center>");

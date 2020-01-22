@@ -78,6 +78,7 @@ import datawave.webservice.result.BaseResponse;
 import datawave.webservice.result.GenericResponse;
 import datawave.webservice.result.QueryImplListResponse;
 import datawave.webservice.result.QueryLogicResponse;
+import datawave.webservice.result.QueryWizardResultResponse;
 import datawave.webservice.result.QueryWizardStep1Response;
 import datawave.webservice.result.QueryWizardStep2Response;
 import datawave.webservice.result.QueryWizardStep3Response;
@@ -382,10 +383,10 @@ public class QueryExecutorBean implements QueryExecutor {
     }
     
     /**
-     * Display a simple query web UI for the quickstart
+     * Display the first step for a simple query web UI in the quickstart
      *
      * @HTTP 200 Success
-     * @return datawave.webservice.result.QueryLogicResponse
+     * @return datawave.webservice.result.QueryWizardStep1Response
      * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
      * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
      * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
@@ -469,10 +470,10 @@ public class QueryExecutorBean implements QueryExecutor {
     }
     
     /**
-     * Display a simple query web UI for the quickstart
+     * Display the second step for a simple query web UI in the quickstart
      *
      * @HTTP 200 Success
-     * @return datawave.webservice.result.QueryLogicResponse
+     * @return datawave.webservice.result.QueryWizardStep2Response
      * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
      * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
      * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
@@ -563,9 +564,13 @@ public class QueryExecutorBean implements QueryExecutor {
     }
     
     /**
-     * @param logicName
-     * @param queryParameters
-     * @return
+     * Display the query plan and link to basic query results for a simple query web UI in the quickstart
+     *
+     * @HTTP 200 Success
+     * @return datawave.webservice.result.QueryWizardStep3Response
+     * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
+     * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
+     * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
      */
     @POST
     @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
@@ -586,6 +591,47 @@ public class QueryExecutorBean implements QueryExecutor {
         queryWizardStep3Response.setQueryPlan(planResponse.getResult());
         
         return queryWizardStep3Response;
+    }
+    
+    /**
+     * Gets the next page of results from the query object. If the object is no longer alive, meaning that the current session has expired, then this fail. The
+     * response object type is dynamic, see the listQueryLogic operation to determine what the response type object will be.
+     *
+     * @param id
+     *            - (@Required)
+     * @see datawave.webservice.query.runner.QueryExecutorBean#showQueryWizardResults(String) for the @Required definition
+     *
+     * @return datawave.webservice.result.BaseQueryResponse
+     * @RequestHeader X-ProxiedEntitiesChain use when proxying request for user, by specifying a chain of DNs of the identities to proxy
+     * @RequestHeader X-ProxiedIssuersChain required when using X-ProxiedEntitiesChain, specify one issuer DN per subject DN listed in X-ProxiedEntitiesChain
+     * @RequestHeader query-session-id session id value used for load balancing purposes. query-session-id can be placed in the request in a Cookie header or as
+     *                a query parameter
+     * @ResponseHeader X-OperationTimeInMS time spent on the server performing the operation, does not account for network or result serialization
+     * @ResponseHeader X-query-page-number page number returned by this call
+     * @ResponseHeader X-query-last-page if true then there are no more pages for this query, caller should call close()
+     * @ResponseHeader X-Partial-Results true if the page contains less than the requested number of results
+     *
+     * @HTTP 200 success
+     * @HTTP 204 success and no results
+     * @HTTP 404 if id not found
+     * @HTTP 412 if the query is no longer alive, client should call {@link #reset(String)} and try again
+     * @HTTP 500 internal server error
+     */
+    @GET
+    @Path("/{id}/showQueryWizardResults")
+    @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
+    @GZIP
+    @EnrichQueryMetrics(methodType = MethodType.NEXT)
+    @Interceptors({ResponseInterceptor.class, RequiredInterceptor.class})
+    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
+    @Timed(name = "dw.query.showQueryWizardResults", absolute = true)
+    public QueryWizardResultResponse showQueryWizardResults(@Required("id") @PathParam("id") String id) {
+        
+        QueryWizardResultResponse theResponse = new QueryWizardResultResponse();
+        theResponse.setQueryId(id);
+        BaseQueryResponse theNextResults = this.next(id, true);
+        theResponse.setResponse(theNextResults);
+        return theResponse;
     }
     
     @Override
