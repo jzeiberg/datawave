@@ -78,7 +78,6 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
             DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
             builder.append("<tr><th>Name</th><th>Value</th><th>Visibility</th><th>Typed Value</th></tr>");
             for (EventBase event : tempResponse.getEvents()) {
-                
                 for (Object field : event.getFields()) {
                     if (field instanceof DefaultField) {
                         DefaultField defaultField = (DefaultField) field;
@@ -90,13 +89,18 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
                         builder.append("</tr>");
                     }
                 }
-                
             }
         } else if (response instanceof DefaultEdgeQueryResponse) {
             DefaultEdgeQueryResponse tempResponse = (DefaultEdgeQueryResponse) response;
+            builder.append("<tr><th>Source</th><th>Sink</th><th>Edge Type</th><th>Activity Date</th><th>Edge Relationship</th></tr>");
             for (EdgeBase edge : tempResponse.getEdges()) {
-                builder.append(edge.toString());
-                builder.append("<br/>");
+                builder.append("<tr>");
+                putTableCell(builder, edge.getSource());
+                putTableCell(builder, edge.getSink());
+                putTableCell(builder, edge.getEdgeType());
+                putTableCell(builder, edge.getActivityDate());
+                putTableCell(builder, edge.getEdgeRelationship());
+                builder.append("</tr>");
             }
         } else if (response instanceof DefaultMetadataQueryResponse) {
             DefaultMetadataQueryResponse tempResponse = (DefaultMetadataQueryResponse) response;
