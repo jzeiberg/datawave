@@ -11,6 +11,8 @@ import datawave.webservice.HtmlProvider;
 import datawave.webservice.query.result.edge.EdgeBase;
 import datawave.webservice.query.result.event.DefaultField;
 import datawave.webservice.query.result.event.EventBase;
+import datawave.webservice.query.result.istat.FieldStat;
+import datawave.webservice.query.result.istat.IndexStatsResponse;
 import datawave.webservice.query.result.metadata.MetadataFieldBase;
 
 @XmlRootElement(name = "QueryWizardNextResult")
@@ -67,12 +69,16 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
     @Override
     public String getMainContent() {
         StringBuilder builder = new StringBuilder();
-        builder.append("<H1>DataWave Query Plan</H1>");
+        builder.append("<H1>DataWave Query Results</H1>");
         builder.append("<br/>");
         builder.append("<br/>");
         builder.append("<br/>");
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
+        if (response == null || !response.getHasResults()) {
+            builder.append("There aren't any results");
+            return builder.toString();
+        }
         builder.append("<table>");
         if (response instanceof DefaultEventQueryResponse) {
             DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
@@ -104,15 +110,29 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
             }
         } else if (response instanceof DefaultMetadataQueryResponse) {
             DefaultMetadataQueryResponse tempResponse = (DefaultMetadataQueryResponse) response;
+            builder.append("<tr><th>Field Name</th><th>Internal Field Name</th><th>Data Type</th><th>Last Updated</th><th>Index only</th></tr>");
             for (MetadataFieldBase field : tempResponse.getFields()) {
-                builder.append(field.toString());
-                builder.append("<br/>");
+                builder.append("<tr>");
+                putTableCell(builder, field.getFieldName());
+                putTableCell(builder, field.getInternalFieldName());
+                putTableCell(builder, field.getDataType());
+                putTableCell(builder, field.getLastUpdated());
+                putTableCell(builder, field.isIndexOnly().toString());
+                builder.append("</tr>");
             }
-            
+        } else if (response instanceof IndexStatsResponse) {
+            IndexStatsResponse tempResponse = (IndexStatsResponse) response;
+            builder.append("<tr><th>Field Name</th><th>Observed</th><th>Selectivity</th><th>Unique</th></tr>");
+            for (FieldStat stat : tempResponse.getFieldStats()) {
+                builder.append("<tr>");
+                putTableCell(builder, stat.field);
+                putTableCell(builder, String.valueOf(stat.observed));
+                putTableCell(builder, String.valueOf(stat.selectivity));
+                putTableCell(builder, String.valueOf(stat.unique));
+            }
         }
         
         builder.append("</table>");
-        
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<center><input type=\"submit\" value=\"Next\" align=\"left\" width=\"50\" /></center>");
