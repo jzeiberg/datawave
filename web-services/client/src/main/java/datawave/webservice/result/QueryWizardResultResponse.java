@@ -9,6 +9,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 
 import datawave.webservice.HtmlProvider;
 import datawave.webservice.query.result.edge.EdgeBase;
+import datawave.webservice.query.result.event.DefaultField;
 import datawave.webservice.query.result.event.EventBase;
 import datawave.webservice.query.result.metadata.MetadataFieldBase;
 
@@ -57,6 +58,12 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         return EMPTY;
     }
     
+    private void putTableCell(StringBuilder builder, String cellValue) {
+        builder.append("<td>\n");
+        builder.append(cellValue);
+        builder.append("</td>\n");
+    }
+    
     @Override
     public String getMainContent() {
         StringBuilder builder = new StringBuilder();
@@ -66,12 +73,22 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         builder.append("<br/>");
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
+        builder.append("<table>");
         if (response instanceof DefaultEventQueryResponse) {
             DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
+            builder.append("<tr><th>Name</th><th>Value</th><th>Visibility</th><th>Typed Value</th></tr>");
             for (EventBase event : tempResponse.getEvents()) {
+                
                 for (Object field : event.getFields()) {
-                    builder.append(field.toString());
-                    builder.append("<br/>");
+                    if (field instanceof DefaultField) {
+                        DefaultField defaultField = (DefaultField) field;
+                        builder.append("<tr>");
+                        putTableCell(builder, defaultField.getName());
+                        putTableCell(builder, defaultField.getValueString());
+                        putTableCell(builder, defaultField.getColumnVisibility());
+                        putTableCell(builder, defaultField.getTypedValue().toString());
+                        builder.append("</tr>");
+                    }
                 }
                 
             }
@@ -89,6 +106,8 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
             }
             
         }
+        
+        builder.append("</table>");
         
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
