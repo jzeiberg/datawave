@@ -1,7 +1,5 @@
 package datawave.webservice.result;
 
-import java.util.List;
-
 import javax.xml.bind.annotation.XmlAccessOrder;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorOrder;
@@ -10,11 +8,9 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
 import datawave.webservice.HtmlProvider;
-import datawave.webservice.query.result.event.DefaultEvent;
+import datawave.webservice.query.result.edge.EdgeBase;
 import datawave.webservice.query.result.event.EventBase;
-import datawave.webservice.query.result.logic.QueryLogicDescription;
-
-import org.apache.commons.lang.StringUtils;
+import datawave.webservice.query.result.metadata.MetadataFieldBase;
 
 @XmlRootElement(name = "QueryWizardNextResult")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -79,7 +75,21 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
                 }
                 
             }
+        } else if (response instanceof DefaultEdgeQueryResponse) {
+            DefaultEdgeQueryResponse tempResponse = (DefaultEdgeQueryResponse) response;
+            for (EdgeBase edge : tempResponse.getEdges()) {
+                builder.append(edge.toString());
+                builder.append("<br/>");
+            }
+        } else if (response instanceof DefaultMetadataQueryResponse) {
+            DefaultMetadataQueryResponse tempResponse = (DefaultMetadataQueryResponse) response;
+            for (MetadataFieldBase field : tempResponse.getFields()) {
+                builder.append(field.toString());
+                builder.append("<br/>");
+            }
+            
         }
+        
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<center><input type=\"submit\" value=\"Next\" align=\"left\" width=\"50\" /></center>");
