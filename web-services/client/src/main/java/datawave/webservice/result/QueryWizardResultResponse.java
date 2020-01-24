@@ -76,7 +76,7 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
         if (response == null || !response.getHasResults()) {
-            builder.append("There aren't any results");
+            builder.append("There aren't anymore results");
             return builder.toString();
         }
         builder.append("<table>");
