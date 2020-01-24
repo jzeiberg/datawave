@@ -82,19 +82,29 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         builder.append("<table>");
         if (response instanceof DefaultEventQueryResponse) {
             DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
-            builder.append("<tr><th>Name</th><th>Value</th><th>Visibility</th><th>Typed Value</th></tr>");
+            builder.append("<tr><th>RowID</th><th>Data Type</th><th>Field Name</th><th>Field Value</th></tr>");
+            String rowId = "";
+            String dataType = "";
             for (EventBase event : tempResponse.getEvents()) {
+                rowId = event.getMetadata().getRow();
+                dataType = event.getMetadata().getDataType();
                 for (Object field : event.getFields()) {
                     if (field instanceof DefaultField) {
-                        DefaultField defaultField = (DefaultField) field;
                         builder.append("<tr>");
+                        DefaultField defaultField = (DefaultField) field;
+                        putTableCell(builder, rowId);
+                        putTableCell(builder, dataType);
                         putTableCell(builder, defaultField.getName());
-                        putTableCell(builder, defaultField.getValueString());
-                        putTableCell(builder, defaultField.getColumnVisibility());
-                        putTableCell(builder, defaultField.getTypedValue().toString());
+                        if (defaultField.getValueString().length() > 300)
+                            putTableCell(builder, defaultField.getValueString().substring(0, 299));
+                        else
+                            putTableCell(builder, defaultField.getValueString());
+                        
                         builder.append("</tr>");
+                        
                     }
                 }
+                
             }
         } else if (response instanceof DefaultEdgeQueryResponse) {
             DefaultEdgeQueryResponse tempResponse = (DefaultEdgeQueryResponse) response;

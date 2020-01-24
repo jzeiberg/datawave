@@ -581,12 +581,22 @@ public class QueryExecutorBean implements QueryExecutor {
     public QueryWizardStep3Response showQueryWizardStep3(@Required("logicName") @PathParam("logicName") String logicName,
                     MultivaluedMap<String,String> queryParameters, @Context HttpHeaders httpHeaders) {
         CreateQuerySessionIDFilter.QUERY_ID.set(null);
+        GenericResponse<String> createResponse;
         QueryWizardStep3Response queryWizardStep3Response = new QueryWizardStep3Response();
-        
-        GenericResponse<String> createResponse = createQuery(logicName, queryParameters, httpHeaders);
+        try {
+            createResponse = createQuery(logicName, queryParameters, httpHeaders);
+        } catch (Exception e) {
+            return queryWizardStep3Response;
+        }
         String queryId = createResponse.getResult();
         CreateQuerySessionIDFilter.QUERY_ID.set(queryId);
-        GenericResponse<String> planResponse = plan(queryId);
+        queryWizardStep3Response.setQueryId(queryId);
+        GenericResponse<String> planResponse;
+        try {
+            planResponse = plan(queryId);
+        } catch (Exception e) {
+            return queryWizardStep3Response;
+        }
         queryWizardStep3Response.setQueryId(queryId);
         queryWizardStep3Response.setQueryPlan(planResponse.getResult());
         
@@ -620,16 +630,18 @@ public class QueryExecutorBean implements QueryExecutor {
     @GET
     @Path("/{id}/showQueryWizardResults")
     @Produces({"application/xml", "text/xml", "application/json", "text/yaml", "text/x-yaml", "application/x-yaml", "text/html"})
-    @GZIP
-    @EnrichQueryMetrics(methodType = MethodType.NEXT)
     @Interceptors({ResponseInterceptor.class, RequiredInterceptor.class})
-    @TransactionAttribute(TransactionAttributeType.REQUIRES_NEW)
     @Timed(name = "dw.query.showQueryWizardResults", absolute = true)
     public QueryWizardResultResponse showQueryWizardResults(@Required("id") @PathParam("id") String id) {
         
         QueryWizardResultResponse theResponse = new QueryWizardResultResponse();
         theResponse.setQueryId(id);
-        BaseQueryResponse theNextResults = this.next(id, true);
+        BaseQueryResponse theNextResults = null;
+        try {
+            theNextResults = this.next(id, true);
+        } catch (Exception e) {
+            theNextResults = null;
+        }
         theResponse.setResponse(theNextResults);
         return theResponse;
     }

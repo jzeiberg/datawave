@@ -22,9 +22,9 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
     private static final long serialVersionUID = 1L;
     private static final String TITLE = "Query Plan", EMPTY = "";
     @XmlElement(name = "plan")
-    private String plan = "";
+    private String plan = null;
     @XmlElement(name = "queryId")
-    private String queryId = "";
+    private String queryId = null;
     
     public void setQueryId(String queryId) {
         this.queryId = queryId;
@@ -65,7 +65,13 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
         builder.append("<H1>DataWave Query Plan</H1>");
         builder.append("<br/>");
         builder.append("<br/>");
-        builder.append("<H2>The query plan: " + plan + "</H2>");
+        if (plan != null)
+            builder.append("<H2>The query plan: " + plan + "</H2>");
+        else {
+            builder.append("<H2>Datawave could not generate a plan for the query");
+            return builder.toString();
+        }
+        
         builder.append("<br/>");
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
