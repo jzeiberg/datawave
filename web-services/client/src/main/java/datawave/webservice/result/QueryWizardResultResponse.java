@@ -21,7 +21,7 @@ import datawave.webservice.query.result.metadata.MetadataFieldBase;
 public class QueryWizardResultResponse extends BaseResponse implements HtmlProvider {
     
     private static final long serialVersionUID = 1L;
-    private static final String TITLE = "Query Result", EMPTY = "";
+    private static final String TITLE = "DataWave Query Results", EMPTY = "";
     @XmlElement(name = "queryId")
     private String queryId = "";
     @XmlElement
@@ -69,14 +69,10 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
     @Override
     public String getMainContent() {
         StringBuilder builder = new StringBuilder();
-        builder.append("<H1>DataWave Query Results</H1>");
-        builder.append("<br/>");
-        builder.append("<br/>");
-        builder.append("<br/>");
-        builder.append("<H2>Results</H2>");
+       
         builder.append("<br/><br/>");
         if (response == null || !response.getHasResults()) {
-            builder.append("There aren't anymore results");
+            builder.append("<H2>There aren't anymore results</H2>");
             return builder.toString();
         }
         builder.append("<table>");
