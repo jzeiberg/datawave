@@ -75,7 +75,7 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
         builder.append("<br/>");
         builder.append("<H2>Results</H2>");
         builder.append("<br/><br/>");
-        builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
+        builder.append("<FORM id=\"queryform\" action=\"/DataWave/BasicQuery/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<center><input type=\"submit\" value=\"Next\" align=\"left\" width=\"50\" /></center>");
         

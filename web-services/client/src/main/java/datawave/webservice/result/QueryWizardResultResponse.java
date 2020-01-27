@@ -69,7 +69,7 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
     @Override
     public String getMainContent() {
         StringBuilder builder = new StringBuilder();
-       
+        
         builder.append("<br/><br/>");
         if (response == null || !response.getHasResults()) {
             builder.append("<H2>There aren't anymore results</H2>");
@@ -139,7 +139,7 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         }
         
         builder.append("</table>");
-        builder.append("<FORM id=\"queryform\" action=\"/DataWave/Query/" + queryId
+        builder.append("<FORM id=\"queryform\" action=\"/DataWave/BasicQuery/" + queryId
                         + "/showQueryWizardResults\"  method=\"get\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<center><input type=\"submit\" value=\"Next\" align=\"left\" width=\"50\" /></center>");
         
