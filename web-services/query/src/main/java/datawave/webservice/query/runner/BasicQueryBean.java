@@ -19,6 +19,7 @@ import datawave.webservice.result.QueryWizardResultResponse;
 import datawave.webservice.result.QueryWizardStep1Response;
 import datawave.webservice.result.QueryWizardStep2Response;
 import datawave.webservice.result.QueryWizardStep3Response;
+import org.apache.deltaspike.core.api.config.ConfigProperty;
 import org.apache.deltaspike.core.api.exclude.Exclude;
 import org.apache.log4j.Logger;
 
@@ -48,6 +49,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.MultivaluedMap;
 import java.lang.reflect.Method;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -81,6 +83,14 @@ public class BasicQueryBean {
     
     @Inject
     private QueryExecutorBean queryExecutor;
+    
+    @Inject
+    @ConfigProperty(name = "dw.cdn.jquery.uri", defaultValue = "/jquery.min.js")
+    private String jqueryUri;
+    
+    @Inject
+    @ConfigProperty(name = "dw.cdn.dataTables.uri", defaultValue = "/jquery.dataTables.min.js")
+    private String dataTablesUri;
     
     @Resource
     private EJBContext ctx;
@@ -302,6 +312,7 @@ public class BasicQueryBean {
         try {
             createResponse = queryExecutor.createQuery(logicName, queryParameters, httpHeaders);
         } catch (Exception e) {
+            queryWizardStep3Response.setErrorMessage(e.getMessage());
             return queryWizardStep3Response;
         }
         String queryId = createResponse.getResult();
@@ -311,9 +322,10 @@ public class BasicQueryBean {
         try {
             planResponse = queryExecutor.plan(queryId);
         } catch (Exception e) {
+            queryWizardStep3Response.setErrorMessage(e.getMessage());
             return queryWizardStep3Response;
         }
-        queryWizardStep3Response.setQueryId(queryId);
+
         queryWizardStep3Response.setQueryPlan(planResponse.getResult());
         
         return queryWizardStep3Response;
@@ -350,7 +362,7 @@ public class BasicQueryBean {
     @Timed(name = "dw.query.showQueryWizardResults", absolute = true)
     public QueryWizardResultResponse showQueryWizardResults(@Required("id") @PathParam("id") String id) {
         
-        QueryWizardResultResponse theResponse = new QueryWizardResultResponse();
+        QueryWizardResultResponse theResponse = new QueryWizardResultResponse(jqueryUri, dataTablesUri);
         theResponse.setQueryId(id);
         BaseQueryResponse theNextResults;
         try {

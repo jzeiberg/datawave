@@ -23,8 +23,11 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
     private static final String TITLE = "Query Plan", EMPTY = "";
     @XmlElement(name = "plan")
     private String plan = null;
+    
     @XmlElement(name = "queryId")
     private String queryId = null;
+    @XmlElement(name = "errorMessage")
+    private String errorMessage = null;
     
     public void setQueryId(String queryId) {
         this.queryId = queryId;
@@ -32,6 +35,10 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
     
     public void setQueryPlan(String theplan) {
         this.plan = theplan;
+    }
+    
+    public void setErrorMessage(String errorMessage) {
+        this.errorMessage = errorMessage;
     }
     
     @Override
@@ -69,6 +76,9 @@ public class QueryWizardStep3Response extends BaseResponse implements HtmlProvid
             builder.append("<H2>The query plan: " + plan + "</H2>");
         else {
             builder.append("<H2>Datawave could not generate a plan for the query");
+            if (errorMessage != null && !errorMessage.isEmpty()) {
+                builder.append("<br><H3>" + errorMessage + "</H3>");
+            }
             return builder.toString();
         }
         
