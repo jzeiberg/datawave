@@ -14,8 +14,12 @@ import datawave.webservice.query.result.event.EventBase;
 import datawave.webservice.query.result.istat.FieldStat;
 import datawave.webservice.query.result.istat.IndexStatsResponse;
 import datawave.webservice.query.result.metadata.MetadataFieldBase;
+import org.apache.hadoop.util.hash.Hash;
 
 import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 @XmlRootElement(name = "QueryWizardNextResult")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -100,30 +104,37 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         
         if (response instanceof DefaultEventQueryResponse) {
             DefaultEventQueryResponse tempResponse = (DefaultEventQueryResponse) response;
-            builder.append("<thead><tr><th>RowID</th><th>Data Type</th><th>Field Name</th><th>Field Value</th></tr></thead>");
+            
+            HashSet<String> fieldnameSet = buildTableColumnHeadings(builder, tempResponse);
+            HashMap<String,String> fieldNameToValueMap = new HashMap<>();
+            
             builder.append("<tbody>");
-            String rowId = "";
+            
             String dataType = "";
             for (EventBase event : tempResponse.getEvents()) {
-                rowId = event.getMetadata().getRow();
                 dataType = event.getMetadata().getDataType();
+                builder.append("<tr>");
+                putTableCell(builder, dataType);
                 for (Object field : event.getFields()) {
                     if (field instanceof DefaultField) {
-                        builder.append("<tr>");
                         DefaultField defaultField = (DefaultField) field;
-                        putTableCell(builder, rowId);
-                        putTableCell(builder, dataType);
-                        putTableCell(builder, defaultField.getName());
-                        if (defaultField.getValueString().length() > 300)
-                            putTableCell(builder, defaultField.getValueString().substring(0, 299));
-                        else
-                            putTableCell(builder, defaultField.getValueString());
-                        
-                        builder.append("</tr>");
+                        fieldNameToValueMap.put(defaultField.getName(), defaultField.getValueString());
+                        /*
+                         * if (defaultField.getValueString().length() > 300) putTableCell(builder, defaultField.getValueString().substring(0, 299)); else
+                         * putTableCell(builder, defaultField.getValueString());
+                         */
                         
                     }
                 }
                 
+                for (String fieldStr : fieldnameSet) {
+                    String fieldValue = fieldNameToValueMap.get(fieldStr);
+                    if (!fieldStr.trim().equals("SUMMARY"))
+                        putTableCell(builder, fieldValue == null ? "" : fieldValue);
+                }
+                
+                fieldNameToValueMap.clear();
+                builder.append("</tr>");
             }
         } else if (response instanceof DefaultEdgeQueryResponse) {
             DefaultEdgeQueryResponse tempResponse = (DefaultEdgeQueryResponse) response;
@@ -178,6 +189,29 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         builder.append("</FORM>");
         
         return builder.toString();
+    }
+    
+    private HashSet<String> buildTableColumnHeadings(StringBuilder builder, DefaultEventQueryResponse tempResponse) {
+        
+        HashSet<String> fieldnameSet = new HashSet<>();
+        builder.append("<thead><tr><th>DataType</th>");
+        for (EventBase event : tempResponse.getEvents()) {
+            for (Object field : event.getFields()) {
+                if (field instanceof DefaultField) {
+                    fieldnameSet.add(((DefaultField) field).getName());
+                }
+            }
+        }
+        
+        for (String fieldname : fieldnameSet) {
+            builder.append("<th>");
+            builder.append(fieldname);
+            builder.append("</th>");
+        }
+        
+        builder.append("</tr></thead>");
+        
+        return fieldnameSet;
     }
     
 }

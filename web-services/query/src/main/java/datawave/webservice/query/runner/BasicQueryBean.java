@@ -325,7 +325,7 @@ public class BasicQueryBean {
             queryWizardStep3Response.setErrorMessage(e.getMessage());
             return queryWizardStep3Response;
         }
-
+        
         queryWizardStep3Response.setQueryPlan(planResponse.getResult());
         
         return queryWizardStep3Response;
