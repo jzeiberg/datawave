@@ -14,12 +14,10 @@ import datawave.webservice.query.result.event.EventBase;
 import datawave.webservice.query.result.istat.FieldStat;
 import datawave.webservice.query.result.istat.IndexStatsResponse;
 import datawave.webservice.query.result.metadata.MetadataFieldBase;
-import org.apache.hadoop.util.hash.Hash;
 
 import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Set;
 
 @XmlRootElement(name = "QueryWizardNextResult")
 @XmlAccessorType(XmlAccessType.NONE)
@@ -82,7 +80,7 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
     }
     
     private void putTableCell(StringBuilder builder, String cellValue) {
-        builder.append("<td>\n");
+        builder.append("<td style=\"border:solid\">\n");
         builder.append(cellValue);
         builder.append("</td>\n");
     }
@@ -96,7 +94,6 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
             builder.append("<H2>There aren't anymore results</H2>");
             return builder.toString();
         }
-        builder.append("<table>");
         
         builder.append("<div>\n");
         builder.append("<div id=\"myTable_wrapper\" class=\"dataTables_wrapper no-footer\">\n");
@@ -119,18 +116,16 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
                     if (field instanceof DefaultField) {
                         DefaultField defaultField = (DefaultField) field;
                         fieldNameToValueMap.put(defaultField.getName(), defaultField.getValueString());
-                        /*
-                         * if (defaultField.getValueString().length() > 300) putTableCell(builder, defaultField.getValueString().substring(0, 299)); else
-                         * putTableCell(builder, defaultField.getValueString());
-                         */
-                        
                     }
                 }
                 
                 for (String fieldStr : fieldnameSet) {
                     String fieldValue = fieldNameToValueMap.get(fieldStr);
-                    if (!fieldStr.trim().equals("SUMMARY"))
+                    if (fieldValue != null && fieldValue.length() > 255)
+                        putTableCell(builder, fieldValue.substring(0, 254));
+                    else
                         putTableCell(builder, fieldValue == null ? "" : fieldValue);
+                    
                 }
                 
                 fieldNameToValueMap.clear();
@@ -177,7 +172,7 @@ public class QueryWizardResultResponse extends BaseResponse implements HtmlProvi
         
         builder.append("</tbody>");
         
-        builder.append("</table>");
+        builder.append("</table><br/><br/>");
         builder.append("  <div class=\"dataTables_info\" id=\"myTable_info\" role=\"status\" aria-live=\"polite\"></div>\n");
         builder.append("</div>\n");
         builder.append("</div>");
