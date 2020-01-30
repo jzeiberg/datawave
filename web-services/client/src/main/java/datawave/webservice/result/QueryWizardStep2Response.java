@@ -22,12 +22,21 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
     private static final long serialVersionUID = 1L;
     private static final String TITLE = "Query Wizard Step 2", EMPTY = "";
     private QueryLogicDescription theQLD = null;
+    private String authString = "";
+    private String visibilityString = "";
     
     @XmlElement(name = "QueryLogic")
     private List<QueryLogicDescription> queryLogicList = null;
     
     public void setTheQueryLogicDescription(QueryLogicDescription queryLogicDescription) {
         this.theQLD = queryLogicDescription;
+    }
+    
+    public void setAuthString(String authString) {
+        this.authString = authString;
+        if (!authString.isEmpty() && authString != null) {
+            visibilityString = authString.replaceAll(",", "|");
+        }
     }
     
     @Override
@@ -72,23 +81,29 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
         // builder.append("<br/><br/>");
         builder.append("<tr><td align=\"left\">Query:</td><td><textarea rows=\"10\" cols=\"65\" placeholder=\"DataWave Query (no enclosing quotes needed)\" name=\"query\" ></textarea></td><tr>");
         // builder.append("<br/><br/>");
-        boolean authsFound = false;
         
         if (theQLD != null) {
             for (String param : theQLD.getRequiredParams()) {
-                if (!param.contains("query") && !param.equals("logicName")) {
+                if (param.equals("auths"))
+                    continue;
+                else if (!param.contains("query") && !param.equals("logicName")) {
                     builder.append("<tr><td align=\"left\">" + param + ": " + "</td>");
                     builder.append("<td><input type=\"text\" name=\"" + param
                                     + "\" placeholder=\"Enter value\" align=\"left\" width=\"50\" align=\"left\" /></td></tr>\n");
                 }
-                if (param.equals("auths"))
-                    authsFound = true;
-                
             }
+            
+            // Show some examples if these were not set dynamically like should have been
+            if (authString.isEmpty() || authString == null) {
+                authString = "BAR,FOO,PRIVATE,PUBLIC";
+                visibilityString = authString.replaceAll(",", "|");
+            }
+            
             /* QueryParametersImpl.java line 125-130 require these next four input params */
-            if (!authsFound)
-                builder.append("<tr><td align=\"left\">auths:</td><td><input type=\"text\" name=\"auths\" value=\"BAR,FOO,PRIVATE,PUBLIC\" /></td></tr>\n");
-            builder.append("<tr><td align=\"left\">Visibility:</td><td><input type=\"text\" name=\"columnVisibility\" value=\"PRIVATE|BAR|FOO\" align=\"left\"/></td></tr>\n");
+            builder.append("<tr><td align=\"left\">auths:</td><td><input type=\"text\" name=\"auths\" placeholder=\"" + authString + "\" value=\"" + authString
+                            + "\" /></td></tr>\n");
+            builder.append("<tr><td align=\"left\">Visibility:</td><td><input type=\"text\" name=\"columnVisibility\" placeholder=\"" + visibilityString
+                            + "\" value=\"" + visibilityString + "\" align=\"left\"/></td></tr>\n");
             builder.append("</table>\n");
             builder.append("<input type=\"hidden\" name=\"param\" value=\"stats=false\" />");
             builder.append("<input type=\"hidden\" name=\"expirationDate\" value=\"20990101\" />");
