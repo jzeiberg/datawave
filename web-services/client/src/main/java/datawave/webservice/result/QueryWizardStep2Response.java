@@ -21,6 +21,8 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
     
     private static final long serialVersionUID = 1L;
     private static final String TITLE = "Query Wizard Step 2", EMPTY = "";
+    private static final String HEADER = "<img src=\"/DataWave/doc/images/dwdocs_logo.png\" width=\"429px\" height=\"38px\"\n"
+                    + " style=\"padding-left: 10px; padding-right: 40px; padding-top: 10px;padding-bottom: 20px\">";
     private QueryLogicDescription theQLD = null;
     private String authString = "";
     private String visibilityString = "";
@@ -51,7 +53,7 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
      */
     @Override
     public String getPageHeader() {
-        return getTitle();
+        return HEADER;
     }
     
     /*

@@ -21,6 +21,8 @@ public class QueryWizardStep1Response extends BaseResponse implements HtmlProvid
     
     private static final long serialVersionUID = 1L;
     private static final String TITLE = "Query Wizard Step 1", EMPTY = "";
+    private static final String HEADER = "<img src=\"/DataWave/doc/images/dwdocs_logo.png\" width=\"429px\" height=\"38px\"\n"
+                    + " style=\"padding-left: 10px; padding-right: 40px; padding-top: 10px;padding-bottom: 20px\">";
     
     @XmlElement(name = "QueryLogic")
     private List<QueryLogicDescription> queryLogicList = null;
@@ -45,7 +47,7 @@ public class QueryWizardStep1Response extends BaseResponse implements HtmlProvid
      */
     @Override
     public String getPageHeader() {
-        return getTitle();
+        return HEADER;
     }
     
     /*
@@ -61,7 +63,7 @@ public class QueryWizardStep1Response extends BaseResponse implements HtmlProvid
     @Override
     public String getMainContent() {
         StringBuilder builder = new StringBuilder();
-        builder.append("<H1>DataWave Query Form</H1>");
+        builder.append("<H1>Query Wizard Step 1 - Choose Query Type</H1>");
         builder.append("<FORM id=\"queryform\" action=\"/DataWave/BasicQuery/showQueryWizardStep2\"  method=\"post\" target=\"_self\" enctype=\"application/x-www-form-urlencoded\">");
         builder.append("<br/>");
         builder.append("<select form=\"queryform\" name=\"queryType\" align=\"left\">");
