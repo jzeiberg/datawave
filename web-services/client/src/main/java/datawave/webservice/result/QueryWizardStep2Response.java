@@ -21,7 +21,7 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
     
     private static final long serialVersionUID = 1L;
     private static final String TITLE = "Query Wizard Step 2", EMPTY = "";
-    private static final String HEADER = "<img src=\"/DataWave/doc/images/dwdocs_logo.png\" width=\"429px\" height=\"38px\"\n"
+    private static final String HEADER = "<img src=\"/DataWave/doc/images/dwquery_logo.png\" width=\"429px\" height=\"38px\"\n"
                     + " style=\"padding-left: 10px; padding-right: 40px; padding-top: 10px;padding-bottom: 20px\">";
     private QueryLogicDescription theQLD = null;
     private String authString = "";
@@ -79,19 +79,16 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
         builder.append("<H2>Required parameters</H2>");
         builder.append("<br/><br/>");
         builder.append("<table>");
-        builder.append("<tr><td align=\"left\">Query Name:</td><td> <input type=\"text\" name=\"queryName\" placeholder=\"Enter value\" align=\"left\" width=\"50\" /></td><tr>");
-        // builder.append("<br/><br/>");
+        builder.append("<tr><td align=\"left\" width=\"10%\">Query Name:</td><td width=\"90%\"> <input type=\"text\" name=\"queryName\" placeholder=\"Enter value\" align=\"left\" /></td><tr>");
         builder.append("<tr><td align=\"left\">Query:</td><td><textarea rows=\"10\" cols=\"65\" placeholder=\"DataWave Query (no enclosing quotes needed)\" name=\"query\" ></textarea></td><tr>");
-        // builder.append("<br/><br/>");
         
         if (theQLD != null) {
             for (String param : theQLD.getRequiredParams()) {
                 if (param.equals("auths"))
                     continue;
                 else if (!param.contains("query") && !param.equals("logicName")) {
-                    builder.append("<tr><td align=\"left\">" + param + ": " + "</td>");
-                    builder.append("<td><input type=\"text\" name=\"" + param
-                                    + "\" placeholder=\"Enter value\" align=\"left\" width=\"50\" align=\"left\" /></td></tr>\n");
+                    builder.append("<tr><td align=\"left\" >" + param + ": " + "</td>");
+                    builder.append("<td><input type=\"text\" name=\"" + param + "\" placeholder=\"Enter value\" align=\"left\" align=\"left\" /></td></tr>\n");
                 }
             }
             
@@ -102,8 +99,8 @@ public class QueryWizardStep2Response extends BaseResponse implements HtmlProvid
             }
             
             /* QueryParametersImpl.java line 125-130 require these next four input params */
-            builder.append("<tr><td align=\"left\">auths:</td><td><input type=\"text\" name=\"auths\" placeholder=\"" + authString + "\" value=\"" + authString
-                            + "\" /></td></tr>\n");
+            builder.append("<tr><td align=\"left\" >auths:</td><td><input type=\"text\" name=\"auths\" placeholder=\"" + authString + "\" value=\""
+                            + authString + "\" /></td></tr>\n");
             builder.append("<tr><td align=\"left\">Visibility:</td><td><input type=\"text\" name=\"columnVisibility\" placeholder=\"" + visibilityString
                             + "\" value=\"" + visibilityString + "\" align=\"left\"/></td></tr>\n");
             builder.append("</table>\n");
