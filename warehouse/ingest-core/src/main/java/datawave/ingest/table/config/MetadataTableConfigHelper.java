@@ -26,6 +26,7 @@ public class MetadataTableConfigHelper extends AbstractTableConfigHelper {
                 setFrequencyCombiner(tops, scope.name());
                 setCombinerForCountMetadata(tops, scope.name());
                 setCombinerForEdgeMetadata(tops, scope.name());
+                setDataFieldCountMapForCountMetadata(tops, scope.name());
             }
         }
         
@@ -46,6 +47,15 @@ public class MetadataTableConfigHelper extends AbstractTableConfigHelper {
         String stem = String.format("%s%s.%s", Property.TABLE_ITERATOR_PREFIX, scopeName, "CountMetadataCombiner");
         setPropertyIfNecessary(tableName, stem, "15,datawave.iterators.CountMetadataCombiner", tops, log);
         setPropertyIfNecessary(tableName, stem + ".opt.columns", ColumnFamilyConstants.COLF_COUNT.toString(), tops, log);
+        return stem;
+    }
+    
+    // add the DataFieldCountMap to the count column
+    private String setDataFieldCountMapForCountMetadata(TableOperations tops, String scopeName) throws AccumuloException, AccumuloSecurityException,
+                    TableNotFoundException {
+        String stem = String.format("%s%s.%s", Property.TABLE_ITERATOR_PREFIX, scopeName, "DataFieldCountMap");
+        setPropertyIfNecessary(tableName, stem, "15,datawave.iterators.DataFieldCountMap", tops, log);
+        setPropertyIfNecessary(tableName, stem + ".opt.columns", ColumnFamilyConstants.COLF_F.toString(), tops, log);
         return stem;
     }
     
