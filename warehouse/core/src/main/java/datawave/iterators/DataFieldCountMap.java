@@ -32,38 +32,20 @@ public class DataFieldCountMap extends Combiner implements Serializable {
      */
     @Override
     public Value reduce(Key key, Iterator<Value> iterator) {
-        MetadataCardinalityCounts counts = null;
-        Value singletonValue = null;
+        
+        StringBuilder newValue = new StringBuilder();
         
         while (iterator.hasNext()) {
             Value value = iterator.next();
             try {
-                MetadataCardinalityCounts newCounts = new MetadataCardinalityCounts(key, value);
-                if (counts == null) {
-                    counts = newCounts;
-                    singletonValue = value;
-                } else {
-                    if (log.isTraceEnabled()) {
-                        log.trace("Merging " + counts + " with " + newCounts);
-                    }
-                    counts.merge(newCounts);
-                    if (log.isTraceEnabled()) {
-                        log.trace("Resulted in " + counts);
-                    }
-                    singletonValue = null;
-                }
+                if (value.get() != null)
+                    newValue.append(value.get()).append(";");
             } catch (Exception e) {
                 log.error("Unable to decode counts from " + key + " / " + value);
             }
         }
-        
-        if (singletonValue != null) {
-            return singletonValue;
-        } else if (counts != null) {
-            return counts.getValue();
-        } else {
-            return new Value();
-        }
+        Value accumulator = new Value(newValue.toString().getBytes());
+        return accumulator;
     }
     
 }
