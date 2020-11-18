@@ -1,6 +1,6 @@
 package datawave.query;
 
-import datawave.query.config.IndexHole;
+import datawave.query.config.ValueIndexHole;
 import datawave.query.exceptions.FullTableScansDisallowedException;
 import datawave.query.testframework.AbstractFields;
 import datawave.query.testframework.AbstractFunctionalQuery;
@@ -29,14 +29,14 @@ import static datawave.query.testframework.RawDataManager.EQ_OP;
 /**
  * The index hole provides the means of using the entries in the event when indexes are missing for a range.
  */
-public class IndexHoleQueryTest extends AbstractFunctionalQuery {
+public class ValueIndexHoleQueryTest extends AbstractFunctionalQuery {
     
-    private static final Logger log = Logger.getLogger(IndexHoleQueryTest.class);
+    private static final Logger log = Logger.getLogger(ValueIndexHoleQueryTest.class);
     
-    private static final List<IndexHole> INDEX_HOLE = new ArrayList<>();
+    private static final List<ValueIndexHole> INDEX_HOLE = new ArrayList<>();
     static {
         String[] dateHole = new String[] {BaseShardIdRange.DATE_2015_0404.getDateStr(), BaseShardIdRange.DATE_2015_0505.getDateStr()};
-        IndexHole hole = new IndexHole(dateHole, new String[] {"us", "ut"});
+        ValueIndexHole hole = new ValueIndexHole(dateHole, new String[] {"us", "ut"});
         INDEX_HOLE.add(hole);
     }
     
@@ -56,7 +56,7 @@ public class IndexHoleQueryTest extends AbstractFunctionalQuery {
         connector = helper.loadTables(log);
     }
     
-    public IndexHoleQueryTest() {
+    public ValueIndexHoleQueryTest() {
         super(CitiesDataType.getManager());
     }
     
