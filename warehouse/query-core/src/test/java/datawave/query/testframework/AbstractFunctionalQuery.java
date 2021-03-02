@@ -168,7 +168,6 @@ public abstract class AbstractFunctionalQuery implements QueryLogicTestHarness.T
         this.logic.setMarkingFunctions(new Default());
         this.logic.setMetadataHelperFactory(new MetadataHelperFactory());
         this.logic.setQueryPlanner(new DefaultQueryPlanner());
-        this.logic.setFederatedQueryPlanner(this.logic.getQueryPlanner());
         this.logic.setResponseObjectFactory(new DefaultResponseObjectFactory());
         
         this.logic.setCollectTimingDetails(true);
@@ -185,7 +184,6 @@ public abstract class AbstractFunctionalQuery implements QueryLogicTestHarness.T
         countLogic.setMetadataHelperFactory(new MetadataHelperFactory());
         countLogic.setQueryPlanner(new DefaultQueryPlanner());
         countLogic.setResponseObjectFactory(new DefaultResponseObjectFactory());
-        this.logic.getFederatedQueryPlanner().setOriginalcountingShardQueryLogic(countLogic);
         
         QueryTestTableHelper.configureLogicToScanTables(countLogic);
         
