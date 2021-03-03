@@ -24,11 +24,7 @@ import org.apache.accumulo.core.security.Authorizations;
 import org.apache.accumulo.core.security.ColumnVisibility;
 import org.apache.commons.collections4.iterators.TransformIterator;
 import org.apache.hadoop.io.Text;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
 
 import com.google.common.collect.Sets;
 
@@ -163,6 +159,7 @@ public class TestCardinalityWithQuery {
         
     }
     
+    @Ignore
     @Test
     public void runQuery() throws Exception {
         SimpleDateFormat format = new SimpleDateFormat("yyyyMMdd");
