@@ -16,6 +16,7 @@ import datawave.query.jexl.nodes.ExceededValueThresholdMarkerJexlNode;
 import datawave.query.jexl.visitors.TreeEqualityVisitor;
 import datawave.query.jexl.visitors.TreeFlatteningRebuildingVisitor;
 import datawave.query.planner.DefaultQueryPlanner;
+import datawave.query.planner.FederatedQueryPlanner;
 import datawave.query.tables.CountingShardQueryLogic;
 import datawave.query.tables.ShardQueryLogic;
 import datawave.query.testframework.QueryLogicTestHarness.DocumentChecker;
@@ -167,7 +168,8 @@ public abstract class AbstractFunctionalQuery implements QueryLogicTestHarness.T
         this.logic.setDateIndexHelperFactory(new DateIndexHelperFactory());
         this.logic.setMarkingFunctions(new Default());
         this.logic.setMetadataHelperFactory(new MetadataHelperFactory());
-        this.logic.setQueryPlanner(new DefaultQueryPlanner());
+        this.logic.setQueryPlanner(new FederatedQueryPlanner());
+        this.logic.setQueryPlanner(new FederatedQueryPlanner());
         this.logic.setResponseObjectFactory(new DefaultResponseObjectFactory());
         
         this.logic.setCollectTimingDetails(true);
