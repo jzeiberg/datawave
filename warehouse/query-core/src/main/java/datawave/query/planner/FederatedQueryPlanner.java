@@ -182,7 +182,6 @@ public class FederatedQueryPlanner extends DefaultQueryPlanner {
         String holeStart = origStartDate;
         YearMonthDay.Bounds bounds = new YearMonthDay.Bounds(origStartDate, false, origEndDate, false);
         boolean firstHole = true;
-        String previousDay, nextDay = null;
         log.debug("startDate is: " + origStartDate + " and endDate is " + origEndDate);
         
         for (String field : fieldToDatatypeMap.keySet()) {
