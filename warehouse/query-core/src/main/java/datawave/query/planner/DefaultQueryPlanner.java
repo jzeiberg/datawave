@@ -9,8 +9,6 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import datawave.query.config.FieldIndexHole;
-import datawave.query.config.ValueIndexHole;
 import datawave.core.iterators.querylock.QueryLock;
 import datawave.data.type.AbstractGeometryType;
 import datawave.data.type.Type;
@@ -153,9 +151,6 @@ import java.util.stream.Collectors;
 public class DefaultQueryPlanner extends QueryPlanner implements Cloneable {
     
     private static final Logger log = ThreadConfigurableLogger.getLogger(DefaultQueryPlanner.class);
-    {
-        log.setLevel(Level.DEBUG);
-    }
     
     public static final String EXCEED_TERM_EXPANSION_ERROR = "Query failed because it exceeded the query term expansion threshold";
     
@@ -1149,7 +1144,7 @@ public class DefaultQueryPlanner extends QueryPlanner implements Cloneable {
         stopwatch.stop();
         
         // if we have any index holes, then mark em
-        if (!config.getValueIndexHoles().isEmpty()) {
+        if (!config.getValueIndexHoles().isEmpty() || !(config.getFieldIndexHoles().isEmpty())) {
             stopwatch = timers.newStartedStopwatch("DefaultQueryPlanner - Mark Index Holes");
             
             queryTree = PushdownMissingIndexRangeNodesVisitor.pushdownPredicates(queryTree, config, metadataHelper);

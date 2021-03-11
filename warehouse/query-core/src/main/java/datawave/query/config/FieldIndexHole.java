@@ -23,9 +23,11 @@ public class FieldIndexHole implements Serializable, Comparable<FieldIndexHole> 
     
     public FieldIndexHole() {}
     
-    public FieldIndexHole(String name, String start) {
+    public FieldIndexHole(String name, String start, String end) {
         fieldName = name;
         startDate = start;
+        endDate = end;
+        
     }
     
     public FieldIndexHole(String field, String[] dateRange) {
